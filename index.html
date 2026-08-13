@@ -1,0 +1,408 @@
+<title>FBS: сборка и доставка</title>
+<style>
+:root{
+  --paper:#FAFAF8; --card:#FFFFFF; --ink:#1F2229; --ink2:#5A5F6B; --muted:#8A8F9A;
+  --line:#E6E6E1; --grid:#EDEDE8;
+  --our:#2F6BDE; --wb:#D9822B; --good:#2E7D52; --bad:#B3403A;
+  --our-soft:rgba(47,107,222,.10); --wb-soft:rgba(217,130,43,.12); --pend:#A8ADB8;
+}
+@media (prefers-color-scheme: dark){:root{
+  --paper:#15171C; --card:#1C1F26; --ink:#E7E9ED; --ink2:#A6ABB6; --muted:#7C818C;
+  --line:#2A2E37; --grid:#252932;
+  --our:#5B8DEF; --wb:#C0761E; --good:#4CAF7D; --bad:#D96A63;
+  --our-soft:rgba(91,141,239,.14); --wb-soft:rgba(192,118,30,.16); --pend:#5A6070;
+}}
+:root[data-theme="light"]{
+  --paper:#FAFAF8; --card:#FFFFFF; --ink:#1F2229; --ink2:#5A5F6B; --muted:#8A8F9A;
+  --line:#E6E6E1; --grid:#EDEDE8; --our:#2F6BDE; --wb:#D9822B; --good:#2E7D52; --bad:#B3403A;
+  --our-soft:rgba(47,107,222,.10); --wb-soft:rgba(217,130,43,.12); --pend:#A8ADB8;
+}
+:root[data-theme="dark"]{
+  --paper:#15171C; --card:#1C1F26; --ink:#E7E9ED; --ink2:#A6ABB6; --muted:#7C818C;
+  --line:#2A2E37; --grid:#252932; --our:#5B8DEF; --wb:#C0761E; --good:#4CAF7D; --bad:#D96A63;
+  --our-soft:rgba(91,141,239,.14); --wb-soft:rgba(192,118,30,.16); --pend:#5A6070;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+.wrap{max-width:1080px;margin:0 auto;padding:28px 20px 48px}
+header h1{font-size:22px;font-weight:650;margin:0 0 4px;letter-spacing:-.01em}
+header .sub{color:var(--ink2);font-size:13px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.filters{display:flex;gap:8px;margin:18px 0 4px;flex-wrap:wrap}
+.fbtn{border:1px solid var(--line);background:var(--card);color:var(--ink2);border-radius:99px;
+  padding:7px 16px;font:600 13px inherit;font-family:inherit;cursor:pointer}
+.fbtn:hover{border-color:var(--muted)}
+.fbtn.on{background:var(--our);border-color:var(--our);color:#fff}
+.fbtn:focus-visible{outline:2px solid var(--our);outline-offset:2px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:10px;margin:14px 0 8px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.kpi .v{font-size:25px;font-weight:650;font-variant-numeric:tabular-nums;letter-spacing:-.01em;margin:2px 0}
+.kpi .d{font-size:12px;color:var(--ink2)}
+.kpi.our .v{color:var(--our)} .kpi.wb .v{color:var(--wb)} .kpi.good .v{color:var(--good)} .kpi.bad .v{color:var(--bad)}
+section{margin-top:30px}
+section>h2{font-size:16px;font-weight:650;margin:0 0 2px}
+section>.note{color:var(--ink2);font-size:12.5px;margin:0 0 12px;max-width:75ch}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px}
+.card h3{font-size:13px;font-weight:600;margin:0 0 2px}
+.card .cnote{font-size:11.5px;color:var(--muted);margin:0 0 10px}
+.stack{height:26px;border-radius:6px;overflow:hidden;display:flex;margin:6px 0 10px}
+.stack div{height:100%}
+.chips{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2)}
+.chips b{color:var(--ink);font-variant-numeric:tabular-nums}
+.dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:0}
+svg{display:block;width:100%;height:auto}
+svg text{font:11px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;fill:var(--ink2)}
+svg .val{fill:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+svg .gridline{stroke:var(--grid);stroke-width:1}
+.tip{position:fixed;pointer-events:none;background:var(--card);border:1px solid var(--line);
+  border-radius:6px;padding:6px 9px;font-size:12px;box-shadow:0 4px 14px rgba(0,0,0,.12);
+  opacity:0;transition:opacity .1s;z-index:9;max-width:240px}
+@media (prefers-reduced-motion: reduce){.tip{transition:none}}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:13px}
+th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+  font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line)}
+td{padding:6px 8px;border-bottom:1px solid var(--grid)}
+td.num,th.num{text-align:right}
+.method{margin-top:34px;border-top:1px solid var(--line);padding-top:14px;color:var(--muted);font-size:12px;max-width:88ch}
+.method b{color:var(--ink2);font-weight:600}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">SELLERDZEN · FBS со своего склада</div>
+  <h1>Скорость сборки и доставки FBS-заказов</h1>
+  <div class="sub">Период с 27.07.2026 · все данные из API WB (заказы, продажи, сборочные задания — только «Склад продавца») · обновлено 12.08.2026 18:03</div>
+</header>
+
+<div class="filters" role="group" aria-label="Юридическое лицо">
+  <button class="fbtn on" data-view="all">Оба юрлица</button>
+  <button class="fbtn" data-view="mast">Маcтюгина К.Ю.</button>
+  <button class="fbtn" data-view="krysin">Крысин Я.П.</button>
+</div>
+
+<div class="kpis" id="kpis"></div>
+
+<section>
+  <h2>1 · Судьба заказов</h2>
+  <p class="note">Все FBS-заказы периода по статусам. «В работе» — заказы, которые сейчас в доставке, у клиента на примерке или в возврате после отказа: период свежий, большинство заказов ещё не закрыто.</p>
+  <div class="card">
+    <div class="stack" id="stack"></div>
+    <div class="chips" id="chips"></div>
+  </div>
+</section>
+
+<section>
+  <h2>2 · Как быстро собираем и отгружаем</h2>
+  <p class="note">Время от создания заказа до сканирования поставки Wildberries (для ещё не отсканированных поставок — момент передачи). Источник — API сборочных заданий, теперь это полные данные по всем заказам, а не выборка из ручной выгрузки.</p>
+  <div class="grid2">
+    <div class="card"><h3>Распределение времени отгрузки</h3><p class="cnote" id="n_asm">заказов по интервалам</p><div id="c_asm_hist"></div></div>
+    <div class="card"><h3>Медиана отгрузки по дням</h3><p class="cnote">часов от заказа до скана · по дате заказа</p><div id="c_asm_daily"></div></div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h3>Комиссия WB за скорость отгрузки</h3>
+    <p class="cnote" id="comm_note">правила WB от 07.08: отгрузка до 13 ч — комиссия −5 п.п., 13–42 ч — −3,5 п.п., 42–48 ч — базовая, дальше — надбавка за каждый час сверх 48-го; оценка — правила применены ко всем отгрузкам периода</p>
+    <div id="c_comm"></div>
+    <div class="chips" style="margin-top:10px" id="comm_chips"></div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h3>Отмены неотгруженных заказов</h3>
+    <p class="cnote">гистограмма — отмены покупателями: сколько времени заказ ждал, прежде чем покупатель его отменил (время из отчёта заказов, кто отменил — из статусов заданий). Суммы — по финальной цене с учётом СПП. Отмены после 24 часов ожидания — вероятная плата за медленную сборку. Отмены с нашей стороны — отдельной строкой ниже</p>
+    <div id="c_canc"></div>
+    <div class="chips" style="margin-top:10px" id="canc_chips"></div>
+  </div>
+</section>
+
+<section>
+  <h2>3 · За сколько заказы доходят до людей</h2>
+  <p class="note">Время от заказа до выкупа клиентом (получил и оплатил). Включает нашу сборку, логистику WB и время, пока клиент забирает заказ из пункта выдачи — физически посылка приезжает на 1–2 дня раньше выкупа.</p>
+  <div class="grid2">
+    <div class="card"><h3>Распределение «заказ → выкуп»</h3><p class="cnote" id="n_del"></p><div id="c_del_hist"></div></div>
+    <div class="card"><h3>Медиана «заказ → выкуп» по дням</h3><p class="cnote">дней · по дате выкупа</p><div id="c_del_daily"></div></div>
+  </div>
+</section>
+
+<section>
+  <h2>4 · В какие регионы доставляем</h2>
+  <p class="note">Топ регионов по числу выкупленных FBS-заказов и скорость до выкупа в каждом. Отгрузка идёт из Московского региона, поэтому центр быстрее, юг и Сибирь — на день-полтора дольше.</p>
+  <div class="grid2">
+    <div class="card"><h3>Топ-14 регионов</h3><p class="cnote">выкупленных заказов · подпись справа — медиана дней до выкупа</p><div id="c_regions"></div></div>
+    <div class="card"><h3>По федеральным округам</h3><p class="cnote">таблица — те же данные числами</p>
+      <table id="t_okrug"><thead><tr><th>Округ</th><th class="num">Выкупов</th><th class="num">Медиана, дн</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>5 · Сравнение брендов</h2>
+  <p class="note">Выкупленные FBS-заказы по брендам выбранного юрлица. Справочно по общей выгрузке: сборка FANBOX — 37 ч, OZITI — 50 ч, REIZI — 36 ч; выкуп среди доехавших: OZITI 68% (рюкзаки не примеряют), FANBOX 45%, REIZI 47%.</p>
+  <div class="grid2">
+    <div class="card"><h3>Выкупы по брендам</h3><p class="cnote">выкупленных заказов · подпись — медиана дней до выкупа</p><div id="c_brands"></div></div>
+    <div class="card"><h3>Цифры по брендам</h3><p class="cnote">таблица — те же данные числами</p>
+      <table id="t_brands"><thead><tr><th>Бренд</th><th class="num">Выкупов</th><th class="num">До выкупа, дн</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+</section>
+
+<p class="method"><b>Методика.</b> Все данные — из API WB по токенам обоих кабинетов, только заказы со склада продавца. «Сборка и отгрузка» — API Маркетплейса: задание → скан поставки (или момент передачи, если скан ещё не проставлен). «Заказ → выкуп» — сопоставление отчётов заказов и продаж по идентификатору заказа. Отмены: время — из отчёта заказов (cancelDate), инициатор — из статусов заданий. Комиссия за скорость действует только для кабинета Крысина Я.П. Чтобы обновить дашборд — попросите Клода «обнови FBS-дашборд».</p>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script>
+const VIEWS = {"mast":{"statuses":{"ordered":13001,"cancelled":2199,"bought":1789,"returned":70,"pending":9013},"kpi_orders":10802,"kpi_n":1789,"median":6.1,"p90":8.9,"delHist":[["до 3 дн",34],["3–5 дн",417],["5–7 дн",778],["7–10 дн",472],["10–14 дн",88],["14+ дн",0]],"delDaily":[["01.08",2.8],["02.08",3.3],["03.08",4.1],["04.08",4.2],["05.08",4.8],["06.08",5.0],["07.08",5.1],["08.08",5.8],["09.08",6.2],["10.08",6.8],["11.08",7.0],["12.08",7.1]],"regions":[["Московская обл.",240,5.3],["Москва",172,5.1],["Краснодарский край",69,6.5],["Санкт-Петербург",66,6.0],["Свердловская обл.",53,6.2],["Ростовская обл.",45,6.9],["Республика Башкортостан",43,6.6],["Нижегородская обл.",41,6.0],["Республика Татарстан",37,5.9],["Ленинградская обл.",34,5.8],["Воронежская обл.",34,6.7],["Владимирская обл.",31,5.0],["Минск",30,6.0],["Самарская обл.",29,5.9]],"okrugs":[["Центральный федеральный округ",717,5.5],["Приволжский федеральный округ",287,6.0],["Северо-Западный федеральный округ",175,6.0],["Южный федеральный округ",148,6.5],["Сибирский федеральный округ",141,7.3],["Уральский федеральный округ",121,6.3],["Северо-Кавказский федеральный округ",37,6.8],["Дальневосточный федеральный округ",37,9.7]],"brands":[["FANBOX",1787,6.1]],"asmN":13967,"asmMedian":61,"asmP90":89,"asmHist":[["до 12 ч",319],["12–24 ч",662],["24–36 ч",1726],["36–48 ч",1338],["48–72 ч",5467],["72+ ч",4455]],"asmDaily":[["27.07",9.3],["28.07",13.0],["29.07",10.3],["30.07",20.7],["31.07",32.0],["01.08",24.2],["02.08",37.8],["03.08",37.9],["04.08",60.8],["05.08",67.3],["06.08",74.9],["07.08",85.5],["08.08",94.3],["09.08",68.6],["10.08",50.5]],"commNA":true,"cancBuyerN":1869,"cancBuyerMoney":6117954,"cancSellerN":51,"cancSellerMoney":155383,"cancDefectN":109,"cancDefectMoney":307482,"cancUnknownN":170,"cancUnknownMoney":588447,"cancPenalty":null,"cancHist":[["до 6 ч",14],["6–24 ч",14],["24–48 ч",24],["48–72 ч",111],["72+ ч",1374]],"cancMedianH":127.3,"cancLate":1509,"cancLatePct":98,"cancLateMoney":4862275,"cancPct":15},"krysin":{"statuses":{"ordered":8403,"cancelled":804,"bought":1078,"returned":14,"pending":6521},"kpi_orders":7599,"kpi_n":1078,"median":5.4,"p90":7.8,"delHist":[["до 3 дн",36],["3–5 дн",367],["5–7 дн",488],["7–10 дн",166],["10–14 дн",21],["14+ дн",0]],"delDaily":[["03.08",3.8],["04.08",4.2],["05.08",4.5],["06.08",4.7],["07.08",5.4],["08.08",4.7],["09.08",5.3],["10.08",5.7],["11.08",5.9],["12.08",6.2]],"regions":[["Московская обл.",159,4.3],["Москва",139,4.7],["Санкт-Петербург",44,5.6],["Краснодарский край",39,6.0],["Республика Татарстан",33,5.4],["Ленинградская обл.",28,5.4],["Нижегородская обл.",27,5.4],["Воронежская обл.",23,5.4],["Ростовская обл.",20,6.3],["Свердловская обл.",20,5.8],["Рязанская обл.",19,5.0],["Пермский край",17,5.7],["Оренбургская обл.",17,5.8],["Пензенская обл.",16,5.1]],"okrugs":[["Центральный федеральный округ",455,4.8],["Приволжский федеральный округ",203,5.5],["Северо-Западный федеральный округ",135,5.7],["Сибирский федеральный округ",80,7.0],["Южный федеральный округ",78,6.0],["Уральский федеральный округ",42,6.0],["Северо-Кавказский федеральный округ",18,6.8],["Дальневосточный федеральный округ",16,9.2]],"brands":[["OZITI",711,5.3],["REIZI",358,5.7]],"asmN":7576,"asmMedian":39,"asmP90":67,"asmHist":[["до 12 ч",229],["12–24 ч",1157],["24–36 ч",1760],["36–48 ч",1691],["48–72 ч",2315],["72+ ч",424]],"asmDaily":[["27.07",10.4],["28.07",6.6],["29.07",21.8],["30.07",22.9],["31.07",30.0],["01.08",27.2],["02.08",33.0],["03.08",47.7],["04.08",49.9],["05.08",66.4],["06.08",65.3],["07.08",44.2],["08.08",24.0],["09.08",39.1],["10.08",28.3]],"commZones":[["до 13 ч",239,45555],["13–42 ч",4092,492344],["42–48 ч",506,0],["48–54 ч",605,-17548],["54–60 ч",371,-40022],["60+ ч",1763,-538328]],"comm":{"save":537899,"loss":595898,"net":-57999,"potential":1284096,"turnover":25681924},"commNA":false,"cancBuyerN":685,"cancBuyerMoney":2534246,"cancSellerN":19,"cancSellerMoney":64361,"cancDefectN":40,"cancDefectMoney":157247,"cancUnknownN":60,"cancUnknownMoney":203345,"cancPenalty":49034,"cancHist":[["до 6 ч",7],["6–24 ч",24],["24–48 ч",16],["48–72 ч",47],["72+ ч",420]],"cancMedianH":109.3,"cancLate":483,"cancLatePct":94,"cancLateMoney":1831771,"cancPct":8},"all":{"statuses":{"ordered":21404,"cancelled":3003,"bought":2867,"returned":84,"pending":15534},"kpi_orders":18401,"kpi_n":2867,"median":5.8,"p90":8.5,"delHist":[["до 3 дн",70],["3–5 дн",784],["5–7 дн",1266],["7–10 дн",638],["10–14 дн",109],["14+ дн",0]],"asmHist":[["до 12 ч",548],["12–24 ч",1819],["24–36 ч",3486],["36–48 ч",3029],["48–72 ч",7782],["72+ ч",4879]],"cancHist":[["до 6 ч",21],["6–24 ч",38],["24–48 ч",40],["48–72 ч",158],["72+ ч",1794]],"delDaily":[["01.08",2.8],["02.08",3.3],["03.08",3.9],["04.08",4.2],["05.08",4.7],["06.08",4.8],["07.08",5.2],["08.08",5.2],["09.08",5.8],["10.08",6.2],["11.08",6.5],["12.08",6.7]],"asmDaily":[["27.07",9.9],["28.07",9.8],["29.07",16.1],["30.07",21.8],["31.07",31.0],["01.08",25.7],["02.08",35.4],["03.08",42.8],["04.08",55.3],["05.08",66.8],["06.08",70.1],["07.08",64.8],["08.08",59.1],["09.08",53.8],["10.08",39.4]],"regions":[["Московская обл.",399,4.9],["Москва",311,4.9],["Санкт-Петербург",110,5.8],["Краснодарский край",108,6.3],["Свердловская обл.",73,6.1],["Республика Татарстан",70,5.7],["Нижегородская обл.",68,5.8],["Ростовская обл.",65,6.7],["Ленинградская обл.",62,5.6],["Воронежская обл.",57,6.2],["Республика Башкортостан",43,6.6],["Владимирская обл.",31,5.0],["Минск",30,6.0],["Самарская обл.",29,5.9]],"okrugs":[["Центральный федеральный округ",1172,5.2],["Приволжский федеральный округ",490,5.8],["Северо-Западный федеральный округ",310,5.9],["Южный федеральный округ",226,6.3],["Сибирский федеральный округ",221,7.2],["Уральский федеральный округ",163,6.2],["Северо-Кавказский федеральный округ",55,6.8],["Дальневосточный федеральный округ",53,9.5]],"brands":[["FANBOX",1787,6.1],["OZITI",711,5.3],["REIZI",358,5.7]],"asmN":21543,"asmMedian":53,"asmP90":81,"comm":{"save":537899,"loss":595898,"net":-57999,"potential":1284096,"turnover":25681924},"commZones":[["до 13 ч",239,45555],["13–42 ч",4092,492344],["42–48 ч",506,0],["48–54 ч",605,-17548],["54–60 ч",371,-40022],["60+ ч",1763,-538328]],"commNA":false,"cancBuyerN":2554,"cancBuyerMoney":8652200,"cancSellerN":70,"cancSellerMoney":219744,"cancDefectN":149,"cancDefectMoney":464729,"cancUnknownN":230,"cancUnknownMoney":791792,"cancLate":1992,"cancLateMoney":6694046,"cancMedianH":122.5,"cancLatePct":78,"cancPct":12,"cancPenalty":49034}};
+
+
+const tip = document.getElementById('tip');
+function showTip(e, html){ tip.innerHTML = html; tip.style.opacity = 1;
+  tip.style.left = Math.min(e.clientX + 12, innerWidth - 250) + 'px'; tip.style.top = (e.clientY + 14) + 'px'; }
+function hideTip(){ tip.style.opacity = 0; }
+const NS = 'http://www.w3.org/2000/svg';
+const fmt = n => n.toLocaleString('ru-RU');
+const dfmt = v => String(v).replace('.', ',');
+function svgEl(w, h){ const s = document.createElementNS(NS,'svg'); s.setAttribute('viewBox',`0 0 ${w} ${h}`); return s; }
+
+function hist(mount, rows, color, unitWord){
+  mount.innerHTML = '';
+  const W=470, H=210, padL=8, padB=22, padT=8, bw=(W-padL*2)/rows.length;
+  const max = Math.max(...rows.map(r=>r[1]), 1), total = rows.reduce((a,r)=>a+r[1],0);
+  const s = svgEl(W,H);
+  rows.forEach((r,i)=>{
+    const h = (H-padB-padT-18) * r[1]/max, x = padL + i*bw + 4, y = H-padB-h;
+    const rect = document.createElementNS(NS,'rect');
+    rect.setAttribute('x',x); rect.setAttribute('y',y); rect.setAttribute('width',bw-8);
+    rect.setAttribute('height',Math.max(h,1.5)); rect.setAttribute('rx',4); rect.setAttribute('fill',color);
+    rect.addEventListener('mousemove', e=>showTip(e,`<b>${r[0]}</b><br>${fmt(r[1])} ${unitWord} · ${Math.round(r[1]/total*100)}%`));
+    rect.addEventListener('mouseleave', hideTip);
+    s.appendChild(rect);
+    const t = document.createElementNS(NS,'text');
+    t.setAttribute('x',x+(bw-8)/2); t.setAttribute('y',y-5); t.setAttribute('text-anchor','middle');
+    t.setAttribute('class','val'); t.textContent = r[1]>0 ? fmt(r[1]) : '';
+    s.appendChild(t);
+    const lx = document.createElementNS(NS,'text');
+    lx.setAttribute('x',x+(bw-8)/2); lx.setAttribute('y',H-6); lx.setAttribute('text-anchor','middle');
+    lx.textContent = r[0]; s.appendChild(lx);
+  });
+  mount.appendChild(s);
+}
+
+function line(mount, rows, color, soft, unit, yFmt){
+  mount.innerHTML = '';
+  const W=470, H=210, padL=38, padR=14, padT=14, padB=24;
+  const vals = rows.map(r=>r[1]);
+  const lo = Math.floor(Math.min(...vals)*0.9*10)/10, hi = Math.ceil(Math.max(...vals)*1.05*10)/10;
+  const x = i => padL + i*(W-padL-padR)/Math.max(rows.length-1,1);
+  const y = v => padT + (H-padT-padB)*(1-(v-lo)/(hi-lo || 1));
+  const s = svgEl(W,H);
+  for(let g=0; g<4; g++){
+    const gv = lo + (hi-lo)*g/3, gy = y(gv);
+    const gl = document.createElementNS(NS,'line');
+    gl.setAttribute('x1',padL); gl.setAttribute('x2',W-padR); gl.setAttribute('y1',gy); gl.setAttribute('y2',gy);
+    gl.setAttribute('class','gridline'); s.appendChild(gl);
+    const gt = document.createElementNS(NS,'text');
+    gt.setAttribute('x',padL-6); gt.setAttribute('y',gy+3); gt.setAttribute('text-anchor','end');
+    gt.textContent = yFmt(gv); s.appendChild(gt);
+  }
+  const pts = rows.map((r,i)=>`${x(i)},${y(r[1])}`).join(' ');
+  const area = document.createElementNS(NS,'polygon');
+  area.setAttribute('points',`${padL},${H-padB} ${pts} ${x(rows.length-1)},${H-padB}`);
+  area.setAttribute('fill',soft); s.appendChild(area);
+  const pl = document.createElementNS(NS,'polyline');
+  pl.setAttribute('points',pts); pl.setAttribute('fill','none');
+  pl.setAttribute('stroke',color); pl.setAttribute('stroke-width',2); pl.setAttribute('stroke-linejoin','round');
+  s.appendChild(pl);
+  rows.forEach((r,i)=>{
+    const last = i===rows.length-1;
+    const c = document.createElementNS(NS,'circle');
+    c.setAttribute('cx',x(i)); c.setAttribute('cy',y(r[1])); c.setAttribute('r',last?4.5:3.5);
+    c.setAttribute('fill',last?color:'transparent'); c.style.pointerEvents='none';
+    s.appendChild(c);
+    const hitW = (W-padL-padR)/Math.max(rows.length-1,1);
+    const hit = document.createElementNS(NS,'rect');
+    hit.setAttribute('x',x(i)-hitW/2); hit.setAttribute('y',0); hit.setAttribute('width',hitW); hit.setAttribute('height',H);
+    hit.setAttribute('fill','transparent');
+    hit.addEventListener('mousemove', e=>{ showTip(e,`<b>${r[0]}</b><br>${yFmt(r[1])} ${unit}`); c.setAttribute('fill',color); });
+    hit.addEventListener('mouseleave', ()=>{ hideTip(); if(!last) c.setAttribute('fill','transparent'); });
+    s.appendChild(hit);
+    if(i%2===0 || last){
+      const lx = document.createElementNS(NS,'text');
+      lx.setAttribute('x',x(i)); lx.setAttribute('y',H-6); lx.setAttribute('text-anchor','middle');
+      lx.textContent = r[0]; s.appendChild(lx);
+    }
+  });
+  const lastR = rows[rows.length-1];
+  const lv = document.createElementNS(NS,'text');
+  lv.setAttribute('x',x(rows.length-1)-6); lv.setAttribute('y',y(lastR[1])-9);
+  lv.setAttribute('text-anchor','end'); lv.setAttribute('class','val');
+  lv.textContent = yFmt(lastR[1]); s.appendChild(lv);
+  mount.appendChild(s);
+}
+
+function hbars(mount, rows, color, tipFn, labelFn, labelW){
+  mount.innerHTML = '';
+  const W=470, rowH=25, padT=4, valW=92;
+  const H = padT + rows.length*rowH + 4;
+  const max = Math.max(...rows.map(r=>r[1]), 1);
+  const s = svgEl(W,H);
+  rows.forEach((r,i)=>{
+    const yy = padT + i*rowH, bw = (W-labelW-valW) * r[1]/max;
+    const name = document.createElementNS(NS,'text');
+    name.setAttribute('x',labelW-8); name.setAttribute('y',yy+16); name.setAttribute('text-anchor','end');
+    name.textContent = r[0]; s.appendChild(name);
+    const rect = document.createElementNS(NS,'rect');
+    rect.setAttribute('x',labelW); rect.setAttribute('y',yy+4); rect.setAttribute('width',Math.max(bw,2));
+    rect.setAttribute('height',rowH-9); rect.setAttribute('rx',4); rect.setAttribute('fill',color);
+    rect.addEventListener('mousemove', e=>showTip(e, tipFn(r)));
+    rect.addEventListener('mouseleave', hideTip);
+    s.appendChild(rect);
+    const v = document.createElementNS(NS,'text');
+    v.setAttribute('x',labelW+Math.max(bw,2)+7); v.setAttribute('y',yy+16); v.setAttribute('class','val');
+    v.textContent = labelFn(r); s.appendChild(v);
+  });
+  mount.appendChild(s);
+}
+
+function drawComm(v){
+  const note = document.getElementById('comm_note');
+  if (v.commNA){
+    document.getElementById('c_comm').innerHTML = '';
+    note.textContent = 'На кабинет Маcтюгиной К.Ю. условия комиссии за скорость отгрузки не распространяются — скидок и штрафов нет.';
+    document.getElementById('comm_chips').innerHTML = '';
+    return;
+  }
+  note.textContent = 'правила WB от 07.08 действуют только для кабинета Крысина Я.П.: отгрузка до 13 ч — комиссия −5 п.п., 13–42 ч — −3,5 п.п., 42–48 ч — базовая, дальше — надбавка за каждый час сверх 48-го; оценка — правила применены к отгрузкам его кабинета за период';
+  const colors = ['var(--good)','var(--good)','var(--pend)','var(--bad)','var(--bad)','var(--bad)'];
+  const descr = ['−5 п.п. к комиссии','−3,5 п.п. к комиссии','базовая комиссия',
+                 '+0,30 п.п./час сверх 48-го','+0,35 п.п./час сверх 48-го','+0,45 п.п./час сверх 48-го'];
+  const mount = document.getElementById('c_comm');
+  mount.innerHTML = '';
+  const zones = v.commZones, total = zones.reduce((a,z)=>a+z[1],0);
+  const W=980, H=190, padL=8, padB=22, padT=8, bw=(W-padL*2)/zones.length;
+  const max = Math.max(...zones.map(z=>z[1]),1);
+  const s2 = svgEl(W,H);
+  zones.forEach((z,i)=>{
+    const h = (H-padB-padT-18)*z[1]/max, x = padL+i*bw+6, y = H-padB-h;
+    const r = document.createElementNS(NS,'rect');
+    r.setAttribute('x',x); r.setAttribute('y',y); r.setAttribute('width',bw-12);
+    r.setAttribute('height',Math.max(h,1.5)); r.setAttribute('rx',4); r.setAttribute('fill',colors[i]);
+    const effTxt = z[2] ? (z[2]>0?'экономия +':'штраф −') + fmt(Math.abs(z[2])) + ' ₽' : '';
+    r.addEventListener('mousemove', e=>showTip(e,`<b>${z[0]}</b><br>${fmt(z[1])} заказов · ${Math.round(z[1]/total*100)}%<br>${descr[i]}${effTxt?'<br>'+effTxt:''}`));
+    r.addEventListener('mouseleave', hideTip);
+    s2.appendChild(r);
+    const t = document.createElementNS(NS,'text');
+    t.setAttribute('x',x+(bw-12)/2); t.setAttribute('y',y-5); t.setAttribute('text-anchor','middle');
+    t.setAttribute('class','val'); t.textContent = z[1] ? fmt(z[1])+' · '+Math.round(z[1]/total*100)+'%' : '0';
+    s2.appendChild(t);
+    const lx = document.createElementNS(NS,'text');
+    lx.setAttribute('x',x+(bw-12)/2); lx.setAttribute('y',H-6); lx.setAttribute('text-anchor','middle');
+    lx.textContent = z[0]; s2.appendChild(lx);
+  });
+  mount.appendChild(s2);
+  const c = v.comm;
+  const netCol = c.net < 0 ? 'var(--bad)' : 'var(--good)';
+  const netSign = c.net < 0 ? '−' : '+';
+  document.getElementById('comm_chips').innerHTML =
+    `<span><span class="dot" style="background:var(--good)"></span>Экономия: <b>${fmt(c.save)} ₽</b></span>` +
+    `<span><span class="dot" style="background:var(--bad)"></span>Потери (штрафы за 48+ ч): <b>${fmt(c.loss)} ₽</b></span>` +
+    `<span>Чистый эффект: <b style="color:${netCol}">${netSign}${fmt(Math.abs(c.net))} ₽</b></span>` +
+    `<span>Потенциал при отгрузке до 13 ч: <b style="color:var(--good)">+${fmt(c.potential)} ₽</b></span>` +
+    `<span>Оборот отгрузок: <b>${fmt(c.turnover)} ₽</b></span>`;
+}
+
+function drawCanc(v){
+  const mount = document.getElementById('c_canc');
+  mount.innerHTML = '';
+  const rows = v.cancHist, total = rows.reduce((a,r)=>a+r[1],0);
+  const W=980, H=180, padL=8, padB=22, padT=8, bw=(W-padL*2)/rows.length;
+  const max = Math.max(...rows.map(r=>r[1]),1);
+  const s2 = svgEl(W,H);
+  rows.forEach((r,i)=>{
+    const h = (H-padB-padT-18)*r[1]/max, x = padL+i*bw+6, y = H-padB-h;
+    const rect = document.createElementNS(NS,'rect');
+    rect.setAttribute('x',x); rect.setAttribute('y',y); rect.setAttribute('width',bw-12);
+    rect.setAttribute('height',Math.max(h,1.5)); rect.setAttribute('rx',4);
+    rect.setAttribute('fill', i<2 ? 'var(--pend)' : 'var(--bad)');
+    rect.addEventListener('mousemove', e=>showTip(e,`<b>ждал ${r[0]}</b><br>${fmt(r[1])} отмен · ${Math.round(r[1]/total*100)}%`));
+    rect.addEventListener('mouseleave', hideTip);
+    s2.appendChild(rect);
+    const t = document.createElementNS(NS,'text');
+    t.setAttribute('x',x+(bw-12)/2); t.setAttribute('y',y-5); t.setAttribute('text-anchor','middle');
+    t.setAttribute('class','val'); t.textContent = fmt(r[1]);
+    s2.appendChild(t);
+    const lx = document.createElementNS(NS,'text');
+    lx.setAttribute('x',x+(bw-12)/2); lx.setAttribute('y',H-6); lx.setAttribute('text-anchor','middle');
+    lx.textContent = r[0]; s2.appendChild(lx);
+  });
+  mount.appendChild(s2);
+  document.getElementById('canc_chips').innerHTML =
+    `<span><span class="dot" style="background:var(--bad)"></span>Отменено покупателями: <b>${fmt(v.cancBuyerN)}</b> на <b>${fmt(v.cancBuyerMoney)} ₽</b></span>` +
+    `<span>из них после 24 ч ожидания: <b>${fmt(v.cancLate)}</b> (${v.cancLatePct}%) на <b>${fmt(v.cancLateMoney)} ₽</b></span>` +
+    `<span>Медиана ожидания до отмены: <b>${dfmt(v.cancMedianH)} ч</b></span>` +
+    `<span><span class="dot" style="background:var(--pend)"></span>Отменено нами: <b>${fmt(v.cancSellerN)}</b> на <b>${fmt(v.cancSellerMoney)} ₽</b></span>` +
+    `<span>Брак: <b>${fmt(v.cancDefectN)}</b> на <b>${fmt(v.cancDefectMoney)} ₽</b></span>` +
+    `<span>Инициатор не определён (старые задания): <b>${fmt(v.cancUnknownN)}</b> на <b>${fmt(v.cancUnknownMoney)} ₽</b></span>` +
+    (v.cancPenalty != null ? `<span><span class="dot" style="background:var(--bad)"></span>Штраф WB за наши отмены (50% цены без СПП, только Крысин Я.П.): <b>${fmt(v.cancPenalty)} ₽</b></span>` : '') +
+    `<span>Все отмены вместе: ${v.cancPct}% заданий</span>`;
+}
+
+function render(key){
+  const v = VIEWS[key];
+  const st = v.statuses;
+  document.getElementById('kpis').innerHTML = [
+    {cls:'wb', v: dfmt(v.median)+' дн', d:'медиана: заказ → выкуп', tip:'90% укладываются в '+dfmt(v.p90)+' дн'},
+    {cls:'', v: fmt(st.ordered), d:'заказано за период', tip:'все FBS-заказы, включая отменённые'},
+    {cls:'good', v: fmt(st.bought), d:'выкуплено', tip:'продажа зарегистрирована WB'},
+    {cls:'bad', v: fmt(st.cancelled), d:'отменено ('+Math.round(st.cancelled/st.ordered*100)+'%)', tip:'отмена до получения'},
+    {cls:'our', v: v.asmMedian+' ч', d:'медиана сборки', tip:'90% отгрузок в пределах '+v.asmP90+' ч'}
+  ].map(k=>`<div class="kpi ${k.cls}" data-tip="${k.tip}"><div class="d">${k.d}</div><div class="v">${k.v}</div></div>`).join('');
+  document.querySelectorAll('.kpi').forEach(el=>{
+    el.addEventListener('mousemove', e=>showTip(e, el.dataset.tip));
+    el.addEventListener('mouseleave', hideTip);
+  });
+
+  const parts = [
+    ['Выкуплено', st.bought, 'var(--good)'],
+    ['В работе (в пути, у клиента, отказы)', st.pending, 'var(--pend)'],
+    ['Отменено', st.cancelled, 'var(--bad)'],
+  ];
+  const total = st.ordered;
+  document.getElementById('stack').innerHTML = parts.map(p=>
+    `<div style="width:${p[1]/total*100}%;background:${p[2]};margin-right:2px" title="${p[0]}: ${fmt(p[1])}"></div>`).join('');
+  document.getElementById('chips').innerHTML =
+    parts.map(p=>`<span><span class="dot" style="background:${p[2]}"></span>${p[0]}: <b>${fmt(p[1])}</b> (${Math.round(p[1]/total*100)}%)</span>`).join('') +
+    `<span>Возвраты после выкупа: <b>${fmt(st.returned)}</b></span>` +
+    `<span>Всего заказано: <b>${fmt(total)}</b></span>`;
+
+  document.getElementById('n_asm').textContent = fmt(v.asmN) + ' отгруженных заданий · медиана ' + v.asmMedian + ' ч, 90% в пределах ' + v.asmP90 + ' ч';
+  hist(document.getElementById('c_asm_hist'), v.asmHist, 'var(--our)', 'заказов');
+  line(document.getElementById('c_asm_daily'), v.asmDaily, 'var(--our)', 'var(--our-soft)', 'ч', x=>Math.round(x)+' ч');
+  drawComm(v);
+  drawCanc(v);
+
+  document.getElementById('n_del').textContent = fmt(v.kpi_n) + ' выкупленных заказов';
+  hist(document.getElementById('c_del_hist'), v.delHist, 'var(--wb)', 'заказов');
+  line(document.getElementById('c_del_daily'), v.delDaily, 'var(--wb)', 'var(--wb-soft)', '', x=>dfmt(Math.round(x*10)/10)+' дн');
+  hbars(document.getElementById('c_regions'), v.regions, 'var(--wb)',
+    r=>`<b>${r[0]}</b><br>${fmt(r[1])} выкупов · медиана ${dfmt(r[2])} дн`,
+    r=>`${fmt(r[1])} · ${dfmt(r[2])} дн`, 138);
+  document.querySelector('#t_okrug tbody').innerHTML = v.okrugs.map(o=>
+    `<tr><td>${o[0]}</td><td class="num">${fmt(o[1])}</td><td class="num">${dfmt(o[2])}</td></tr>`).join('');
+  hbars(document.getElementById('c_brands'), v.brands, 'var(--wb)',
+    r=>`<b>${r[0]}</b><br>${fmt(r[1])} выкупов · медиана ${dfmt(r[2])} дн`,
+    r=>`${fmt(r[1])} · ${dfmt(r[2])} дн`, 90);
+  document.querySelector('#t_brands tbody').innerHTML = v.brands.map(b=>
+    `<tr><td>${b[0]}</td><td class="num">${fmt(b[1])}</td><td class="num">${dfmt(b[2])}</td></tr>`).join('');
+}
+
+render('all');
+
+document.querySelectorAll('.fbtn').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.fbtn').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    render(b.dataset.view);
+  });
+});
+</script>
