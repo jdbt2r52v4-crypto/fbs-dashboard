@@ -39,6 +39,9 @@ header .sub{color:var(--ink2);font-size:13px}
 .kpi{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
 .kpi .v{font-size:25px;font-weight:650;font-variant-numeric:tabular-nums;letter-spacing:-.01em;margin:2px 0}
 .kpi .d{font-size:12px;color:var(--ink2)}
+#t_subjects .c-fbs{color:var(--our);background:var(--our-soft);font-weight:600}
+#t_subjects .c-fbo{color:var(--wb);background:var(--wb-soft);font-weight:600}
+#t_subjects th.c-fbs,#t_subjects th.c-fbo{font-weight:700}
 .kpi.our .v{color:var(--our)} .kpi.wb .v{color:var(--wb)} .kpi.good .v{color:var(--good)} .kpi.bad .v{color:var(--bad)}
 section{margin-top:30px}
 section>h2{font-size:16px;font-weight:650;margin:0 0 2px}
@@ -158,9 +161,9 @@ td.num,th.num{text-align:right}
   <h2>6 · Выкуп по категориям: FBS против FBO</h2>
   <p class="note">% выкупа = выкуплено ÷ (выкуплено + отказы + брак) по предметам карточек WB. Отказ — покупатель не забрал заказ или отменил его до отгрузки; брак — порча или утеря. Заказы, которые ещё едут или ждут на ПВЗ, и отмены с нашей стороны в расчёт не входят. Показаны категории с 15+ завершёнными заказами. Рядом — выкуп тех же категорий на FBO (склады WB) за тот же период: там статусов заданий нет, поэтому выкуп считается как продажи ÷ (продажи + отменённые заказы). Прочерк — на FBO эта категория не продавалась.</p>
   <div class="grid2">
-    <div class="card"><h3>% выкупа по категориям</h3><p class="cnote">цветная полоса — FBS, серая — FBO · подпись: FBS% / FBO%</p><div id="c_subjects"></div></div>
+    <div class="card"><h3>% выкупа по категориям</h3><p class="cnote">синяя полоса — FBS (наш склад), оранжевая — FBO (склад WB) · подпись: FBS% / FBO%</p><div id="c_subjects"></div></div>
     <div class="card"><h3>Цифры по категориям</h3><p class="cnote">таблица — те же данные числами</p>
-      <table id="t_subjects"><thead><tr><th>Категория</th><th class="num">Выкуплено</th><th class="num">Отказы</th><th class="num">Брак</th><th class="num">FBS</th><th class="num">FBO</th><th class="num">Δ</th></tr></thead><tbody></tbody></table>
+      <table id="t_subjects"><thead><tr><th>Категория</th><th class="num">Выкуплено</th><th class="num">Отказы</th><th class="num">Брак</th><th class="num c-fbs">FBS</th><th class="num c-fbo">FBO</th><th class="num">Δ</th></tr></thead><tbody></tbody></table>
     </div>
   </div>
 </section>
@@ -430,10 +433,10 @@ function render(key){
         rect.addEventListener('mouseleave', hideTip);
         sv.appendChild(rect);
       };
-      bar(r[4], 4, r[4] >= 50 ? 'var(--good)' : (r[4] >= 40 ? 'var(--warn)' : 'var(--bad)'),
+      bar(r[4], 4, 'var(--our)',
           `<b>${r[0]} — FBS</b><br>выкуп ${r[4]}%<br>выкуплено ${fmt(r[1])} · отказы ${fmt(r[2])} · брак ${fmt(r[3])}`);
       if (r[7] !== null && r[7] !== undefined)
-        bar(r[7], 16, 'var(--pend)',
+        bar(r[7], 16, 'var(--wb)',
             `<b>${r[0]} — FBO</b><br>выкуп ${r[7]}%<br>выкуплено ${fmt(r[5])} · отказы ${fmt(r[6])}`);
       const val = document.createElementNS(NS,'text');
       val.setAttribute('x',W-valW+8); val.setAttribute('y',yy+18); val.setAttribute('class','val');
@@ -444,7 +447,7 @@ function render(key){
       const d = (r[7]===null||r[7]===undefined) ? null : r[4]-r[7];
       const dTxt = d===null ? '—' : (d>0?'+':'')+d+' п.п.';
       const cls = d===null ? '' : (d>0?' style="color:var(--good)"':(d<0?' style="color:var(--bad)"':''));
-      return `<tr><td>${r[0]}</td><td class="num">${fmt(r[1])}</td><td class="num">${fmt(r[2])}</td><td class="num">${fmt(r[3])}</td><td class="num">${r[4]}%</td><td class="num">${r[7]===null||r[7]===undefined?'—':r[7]+'%'}</td><td class="num"${cls}>${dTxt}</td></tr>`;
+      return `<tr><td>${r[0]}</td><td class="num">${fmt(r[1])}</td><td class="num">${fmt(r[2])}</td><td class="num">${fmt(r[3])}</td><td class="num c-fbs">${r[4]}%</td><td class="num c-fbo">${r[7]===null||r[7]===undefined?'—':r[7]+'%'}</td><td class="num"${cls}>${dTxt}</td></tr>`;
     }).join('');
   })();
   hbars(document.getElementById('c_brands'), v.brands, 'var(--wb)',
